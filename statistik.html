@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Statistik Pernikahan KUA Gabuswetan</title>
+
+  <!-- WAJIB: Viewport agar iframe ikut mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Plugin Data Labels -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+  <style>
+    body {
+      font-family: Calibri, sans-serif;
+      margin: 0;
+    }
+    select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: none;
+      font-family: Calibri, sans-serif;
+    }
+    select::-ms-expand {
+      display: none;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 overflow-hidden">
+
+<div class="w-full max-w-5xl mx-auto bg-white rounded-xl shadow-md 
+            p-4 sm:p-6 md:p-8 mb-8 sm:mb-12 md:mb-16">
+
+  <!-- JUDUL -->
+  <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-center mb-4 sm:mb-6">
+    Statistik Pernikahan KUA Gabuswetan
+  </h2>
+
+  <!-- FILTER -->
+  <div class="flex flex-col sm:flex-row justify-center items-stretch sm:items-end 
+              gap-3 sm:gap-4 mb-5">
+
+    <div class="w-full sm:w-auto">
+      <label class="block text-sm font-semibold text-gray-700 mb-1">
+        Desa / Kelurahan
+      </label>
+      <select id="filterDesa"
+        class="border border-gray-300 rounded-lg px-3 py-2 w-full sm:w-48">
+        <option value="semua">Semua Desa</option>
+        <option value="Gabuswetan">Gabuswetan</option>
+        <option value="Gabuskulon">Gabus Kulon</option>
+        <option value="Rancahan">Rancahan</option>
+        <option value="Rancamulya">Rancamulya</option>
+        <option value="Kedokangabus">Kedokan Gabus</option>
+        <option value="Sekarmulya">Sekar Mulya</option>
+        <option value="Babakanjaya">Babakan Jaya</option>
+        <option value="DruntenWetan">Drunten Wetan</option>
+        <option value="DruntenKulon">Drunten Kulon</option>
+        <option value="Kedungdawa">Kedung Dawa</option>
+      </select>
+    </div>
+
+    <div class="w-full sm:w-auto">
+      <label class="block text-sm font-semibold text-gray-700 mb-1">
+        Tahun
+      </label>
+      <select id="filterTahun"
+        class="border border-gray-300 rounded-lg px-3 py-2 w-full sm:w-32">
+        <option value="2025">2025</option>
+        <option value="2026">2026</option>
+      </select>
+    </div>
+
+  </div>
+
+  <!-- CHART -->
+  <div class="relative w-full h-[260px] sm:h-[320px] md:h-[360px]">
+    <canvas id="chartNikah"></canvas>
+  </div>
+
+  <!-- TOTAL -->
+  <p class="text-center mt-4 sm:mt-6 text-sm sm:text-base font-semibold text-gray-700">
+    Total pernikahan wilayah KUA Gabuswetan tahun
+    <span id="tahunText">2025</span>:
+    <b id="totalNikah">0</b> pasangan
+  </p>
+
+</div>
+
+<script>
+Chart.register(ChartDataLabels);
+
+/* ===============================
+   DATA
+================================ */
+const bulan = [
+  'Jan','Feb','Mar','Apr','Mei','Jun',
+  'Jul','Agu','Sep','Okt','Nov','Des'
+];
+
+const dataPerTahun = {
+  2025: {
+    total: [22,22,4,53,12,106,25,26,34,69,48,40],
+    desa: {
+      Gabuswetan:[2,3,0,4,1,7,3,3,4,4,4,4],
+      Gabuskulon:[4,4,0,8,0,14,6,2,3,10,5,4],
+      Rancahan:[2,1,0,4,1,9,2,2,1,4,4,1],
+      Rancamulya:[1,1,0,3,1,5,2,1,4,4,2,0],
+      Kedokangabus:[5,1,2,4,0,12,1,3,1,7,5,4],
+      Sekarmulya:[1,2,0,2,0,7,2,1,5,4,5,2],
+      Babakanjaya:[2,1,0,10,3,16,6,7,4,10,3,8],
+      DruntenWetan:[1,3,1,11,2,16,1,3,6,9,9,7],
+      DruntenKulon:[1,3,1,4,2,7,2,1,4,7,6,4],
+      Kedungdawa:[3,3,0,3,2,13,0,3,2,10,5,6]
+    }
+  },
+  2026: {
+    total: Array(12).fill(0),
+    desa: Object.fromEntries(
+      ['Gabuswetan','Gabuskulon','Rancahan','Rancamulya','Kedokangabus',
+       'Sekarmulya','Babakanjaya','DruntenWetan','DruntenKulon','Kedungdawa']
+      .map(d => [d, Array(12).fill(0)])
+    )
+  }
+};
+
+/* ===============================
+   UTIL
+================================ */
+function hitungMaxY(data) {
+  const max = Math.max(...data);
+  if (max <= 5) return max + 1;
+  if (max <= 10) return max + 2;
+  if (max <= 20) return max + 3;
+  return Math.ceil(max * 1.1);
+}
+
+/* ===============================
+   CHART
+================================ */
+const ctx = document.getElementById('chartNikah');
+const filterDesa = document.getElementById('filterDesa');
+const filterTahun = document.getElementById('filterTahun');
+const totalNikah = document.getElementById('totalNikah');
+const tahunText = document.getElementById('tahunText');
+
+const chart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: bulan,
+    datasets: [{
+      data: dataPerTahun[2025].total,
+      backgroundColor: 'rgba(74,222,128,0.6)',
+
+
+
+      borderRadius: 5,
+      barThickness: window.innerWidth < 640 ? 18 : 38,
+maxBarThickness: 42
+
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      datalabels: {
+        anchor: 'end',
+        align: 'top',
+        color: '#1f2937',
+        font: ctx => ({
+          size: window.innerWidth < 640 ? 10 : 12,
+          weight: 'bold'
+        }),
+        formatter: v => v > 0 ? v : ''
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          font: {
+            size: window.innerWidth < 640 ? 10 : 12
+          }
+        }
+      },
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+
+/* ===============================
+   UPDATE
+================================ */
+function updateChart() {
+  const tahun = filterTahun.value;
+  const desa = filterDesa.value;
+
+  const data = desa === 'semua'
+    ? dataPerTahun[tahun].total
+    : dataPerTahun[tahun].desa[desa];
+
+  chart.data.datasets[0].data = data;
+  chart.options.scales.y.max = hitungMaxY(data);
+  chart.update();
+
+  totalNikah.textContent = data.reduce((a,b)=>a+b,0);
+  tahunText.textContent = tahun;
+}
+
+filterDesa.addEventListener('change', updateChart);
+filterTahun.addEventListener('change', updateChart);
+updateChart();
+</script>
+
+</body>
+</html>
