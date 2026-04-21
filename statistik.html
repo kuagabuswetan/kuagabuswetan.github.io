@@ -121,14 +121,22 @@ const dataPerTahun = {
       DruntenKulon:[1,3,1,4,2,7,2,1,4,7,6,4],
       Kedungdawa:[3,3,0,3,2,13,0,3,2,10,5,6]
     }
-  },
+  }, 
+  
   2026: {
-    total: Array(12).fill(0),
-    desa: Object.fromEntries(
-      ['Gabuswetan','Gabuskulon','Rancahan','Rancamulya','Kedokangabus',
-       'Sekarmulya','Babakanjaya','DruntenWetan','DruntenKulon','Kedungdawa']
-      .map(d => [d, Array(12).fill(0)])
-    )
+    total: [38,30,28,0,0,0,0,0,0,0,0,0],
+    desa: {
+      Gabuswetan:   [6,3,3,0,0,0,0,0,0,0,0,0],
+      Gabuskulon:   [4,2,6,0,0,0,0,0,0,0,0,0],
+      Rancahan:     [1,1,1,0,0,0,0,0,0,0,0,0],
+      Rancamulya:   [3,0,1,0,0,0,0,0,0,0,0,0],
+      Kedokangabus: [0,3,7,0,0,0,0,0,0,0,0,0],
+      Sekarmulya:   [6,6,1,0,0,0,0,0,0,0,0,0],
+      Babakanjaya:  [1,3,1,0,0,0,0,0,0,0,0,0],
+      DruntenWetan: [9,7,2,0,0,0,0,0,0,0,0,0],
+      DruntenKulon: [3,3,4,0,0,0,0,0,0,0,0,0],
+      Kedungdawa:   [5,2,2,0,0,0,0,0,0,0,0,0]
+    }
   }
 };
 
